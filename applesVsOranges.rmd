@@ -1,0 +1,34 @@
+---
+title: "applesVsOranges"
+author: "David Hood"
+date: "10 July 2014"
+output: html_document
+---
+
+This is a simple rmarkdown document simply being used to convert a repo on github containing a .html file made from an .rmd into a gothub powered website:
+
+```{r}
+#read in and clean data
+aoraw <- read.csv("apples_and_oranges.csv", stringsAsFactors=FALSE, header=FALSE)
+aodata <- aoraw[3:700,]
+names(aodata) <- c("country", "countrynumber", "products", "productnumber", "tonnes", "year")
+aodata$countrynumber <- as.integer(aodata$countrynumber)
+fslines <- which(aodata$country == "Food supply quantity (tonnes) (tonnes)")
+aodata <- aodata[(-1 * fslines),]
+aodata$tonnes <- gsub("\xca", "", aodata$tonnes)
+aodata$tonnes <- gsub(", tonnes \\(\\)", "", aodata$tonnes)
+aodata$tonnes <- as.numeric(aodata$tonnes)
+aodata$year <- 2009
+library(reshape2)
+partcleanao <- dcast(aodata[,c(1:3,5)], formula = country + countrynumber ~ products, value.var="tonnes")
+names(partcleanao)[3:4] <- c("apples", "oranges")
+cleanao <- partcleanao[(complete.cases(partcleanao)),]
+```
+
+For what it is worth, this is just using FAO data to compare apples and oranges:
+
+```{r}
+plot(cleanao$apples,cleanao$oranges)
+```
+
+
